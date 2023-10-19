@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using NReco.VideoConverter;
+using Amazon.ElasticFileSystem;
+using Amazon.ElasticFileSystem.Model;
+using Amazon.Runtime;
+using Amazon.ElasticFileSystem.Endpoints;
 
 namespace Converter.Controllers
 {
@@ -48,7 +52,7 @@ namespace Converter.Controllers
                     var ffMpeg = new FFMpegConverter();
                     ffMpeg.ConvertMedia(inputFilePath, outputFilePath, Format.ac3);
 
-                    return File(System.IO.File.ReadAllBytes(outputFilePath), "audio/ac3", "output.ac3");
+                    return File(System.IO.File.ReadAllBytes(outputFilePath), "audio/mp3", "output.mp3");
                 }
                 else
                 {
@@ -59,6 +63,12 @@ namespace Converter.Controllers
 
             ModelState.AddModelError("mp4File", "Please select an MP4 file.");
             return View();
+        }
+
+        private void UploadFileToEFS(string efsMountPath, string localFilePath)
+        {
+            string efsFilePath = Path.Combine(efsMountPath, Path.GetFileName(localFilePath));
+            System.IO.File.Copy(localFilePath, efsFilePath);
         }
     }
 }
